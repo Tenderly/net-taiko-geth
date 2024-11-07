@@ -22,10 +22,10 @@ import (
 	"fmt"
 	"math/bits"
 
-	"github.com/ethereum/go-ethereum/beacon/params"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	bls "github.com/protolambda/bls12-381-util"
+	"github.com/tenderly/net-taiko-geth/beacon/params"
+	"github.com/tenderly/net-taiko-geth/common"
+	"github.com/tenderly/net-taiko-geth/common/hexutil"
 )
 
 // SerializedSyncCommitteeSize is the size of the sync committee plus the

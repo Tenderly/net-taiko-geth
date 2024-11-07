@@ -25,13 +25,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/ethdb/leveldb"
-	"github.com/ethereum/go-ethereum/ethdb/memorydb"
-	"github.com/ethereum/go-ethereum/ethdb/pebble"
-	"github.com/ethereum/go-ethereum/log"
 	"github.com/olekukonko/tablewriter"
+	"github.com/tenderly/net-taiko-geth/common"
+	"github.com/tenderly/net-taiko-geth/ethdb"
+	"github.com/tenderly/net-taiko-geth/ethdb/leveldb"
+	"github.com/tenderly/net-taiko-geth/ethdb/memorydb"
+	"github.com/tenderly/net-taiko-geth/ethdb/pebble"
+	"github.com/tenderly/net-taiko-geth/log"
 )
 
 // freezerdb is a database wrapper that enables ancient chain segment freezing.
