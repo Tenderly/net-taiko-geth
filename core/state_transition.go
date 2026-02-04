@@ -23,12 +23,12 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/tracing"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto/kzg4844"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/tenderly/net-taiko-geth/common"
+	"github.com/tenderly/net-taiko-geth/core/tracing"
+	"github.com/tenderly/net-taiko-geth/core/types"
+	"github.com/tenderly/net-taiko-geth/core/vm"
+	"github.com/tenderly/net-taiko-geth/crypto/kzg4844"
+	"github.com/tenderly/net-taiko-geth/params"
 	"github.com/holiman/uint256"
 )
 

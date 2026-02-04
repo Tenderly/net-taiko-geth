@@ -5,15 +5,15 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/consensus/taiko"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/miner"
+	"github.com/tenderly/net-taiko-geth"
+	"github.com/tenderly/net-taiko-geth/common"
+	"github.com/tenderly/net-taiko-geth/common/hexutil"
+	"github.com/tenderly/net-taiko-geth/common/math"
+	"github.com/tenderly/net-taiko-geth/consensus/taiko"
+	"github.com/tenderly/net-taiko-geth/core"
+	"github.com/tenderly/net-taiko-geth/core/rawdb"
+	"github.com/tenderly/net-taiko-geth/log"
+	"github.com/tenderly/net-taiko-geth/miner"
 )
 
 // ErrProposalLastBlockUncertain indicates the last block for the proposal is not yet deterministic.

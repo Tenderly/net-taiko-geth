@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/tenderly/net-taiko-geth/common"
 )
 
 // To make taiko-geth compatible with the op-service library, we need to define the following constants and functions.

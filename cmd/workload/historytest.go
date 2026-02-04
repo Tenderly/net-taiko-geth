@@ -21,10 +21,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/internal/utesting"
+	"github.com/tenderly/net-taiko-geth/common"
+	"github.com/tenderly/net-taiko-geth/common/hexutil"
+	"github.com/tenderly/net-taiko-geth/core/types"
+	"github.com/tenderly/net-taiko-geth/internal/utesting"
 )
 
 // historyTest is the content of a history test.

@@ -23,8 +23,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/internal/version"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/tenderly/net-taiko-geth/internal/version"
+	"github.com/tenderly/net-taiko-geth/log"
 	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli/v2"
 )

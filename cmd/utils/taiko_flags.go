@@ -3,10 +3,10 @@ package utils
 import (
 	"os"
 
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/tenderly/net-taiko-geth/eth"
+	"github.com/tenderly/net-taiko-geth/eth/ethconfig"
+	"github.com/tenderly/net-taiko-geth/node"
+	"github.com/tenderly/net-taiko-geth/rpc"
 	"github.com/urfave/cli/v2"
 )
 

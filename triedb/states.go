@@ -17,8 +17,8 @@
 package triedb
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/triedb/pathdb"
+	"github.com/tenderly/net-taiko-geth/common"
+	"github.com/tenderly/net-taiko-geth/triedb/pathdb"
 )
 
 // StateSet represents a collection of mutated states during a state transition.

@@ -5,8 +5,8 @@ import (
 	"math"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/tenderly/net-taiko-geth/core"
+	"github.com/tenderly/net-taiko-geth/log"
 	"github.com/holiman/uint256"
 )
 

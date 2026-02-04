@@ -1,6 +1,6 @@
 package common
 
-import "github.com/ethereum/go-ethereum/common/hexutil"
+import "github.com/tenderly/net-taiko-geth/common/hexutil"
 
 // BlockEnv The block environment.
 type BlockEnv struct {

@@ -26,10 +26,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/internal/testrand"
+	"github.com/tenderly/net-taiko-geth/common"
+	"github.com/tenderly/net-taiko-geth/common/math"
+	"github.com/tenderly/net-taiko-geth/crypto"
+	"github.com/tenderly/net-taiko-geth/internal/testrand"
 )
 
 const jsondata = `

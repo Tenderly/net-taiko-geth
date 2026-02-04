@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/miner"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/tenderly/net-taiko-geth/common"
+	"github.com/tenderly/net-taiko-geth/common/hexutil"
+	"github.com/tenderly/net-taiko-geth/core/types"
+	"github.com/tenderly/net-taiko-geth/internal/ethapi"
+	"github.com/tenderly/net-taiko-geth/log"
+	"github.com/tenderly/net-taiko-geth/miner"
+	"github.com/tenderly/net-taiko-geth/rlp"
 	"github.com/status-im/keycard-go/hexutils"
 )
 
