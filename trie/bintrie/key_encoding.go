@@ -19,7 +19,7 @@ package bintrie
 import (
 	"bytes"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/tenderly/net-taiko-geth/common"
 	"github.com/holiman/uint256"
 )
 

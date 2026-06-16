@@ -21,8 +21,8 @@ package crypto
 import (
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto/keccak"
+	"github.com/tenderly/net-taiko-geth/common"
+	"github.com/tenderly/net-taiko-geth/crypto/keccak"
 )
 
 // NewKeccakState creates a new KeccakState

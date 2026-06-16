@@ -11,7 +11,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/eth"
+	"github.com/tenderly/net-taiko-geth/eth"
 )
 
 type JRGenSpec struct {

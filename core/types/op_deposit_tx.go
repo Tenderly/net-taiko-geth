@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/tenderly/net-taiko-geth/common"
+	"github.com/tenderly/net-taiko-geth/rlp"
 )
 
 // CHANGES(taiko): make taiko-geth compatible with the op-service library.

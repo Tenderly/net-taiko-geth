@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/tenderly/net-taiko-geth/common"
 )
 
 // TestUnzenBlockLimit pins the single Unzen block budget used by every Taiko chain.

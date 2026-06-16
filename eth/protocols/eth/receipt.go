@@ -23,8 +23,8 @@ import (
 	"iter"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/tenderly/net-taiko-geth/core/types"
+	"github.com/tenderly/net-taiko-geth/rlp"
 )
 
 // Receipt is the representation of receipts for networking purposes.

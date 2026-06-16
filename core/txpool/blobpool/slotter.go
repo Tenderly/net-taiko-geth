@@ -17,7 +17,7 @@
 package blobpool
 
 import (
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/tenderly/net-taiko-geth/params"
 	"github.com/holiman/billy"
 )
 

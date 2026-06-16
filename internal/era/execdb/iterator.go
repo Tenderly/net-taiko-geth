@@ -22,10 +22,10 @@ import (
 	"math/big"
 	"slices"
 
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/internal/era"
-	"github.com/ethereum/go-ethereum/internal/era/e2store"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/tenderly/net-taiko-geth/core/types"
+	"github.com/tenderly/net-taiko-geth/internal/era"
+	"github.com/tenderly/net-taiko-geth/internal/era/e2store"
+	"github.com/tenderly/net-taiko-geth/rlp"
 	"github.com/klauspost/compress/snappy"
 )
 

@@ -19,9 +19,9 @@ package native
 import (
 	"encoding/json"
 
-	"github.com/ethereum/go-ethereum/core/tracing"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/eth/tracers"
+	"github.com/tenderly/net-taiko-geth/core/tracing"
+	"github.com/tenderly/net-taiko-geth/core/vm"
+	"github.com/tenderly/net-taiko-geth/eth/tracers"
 )
 
 // opcodeCounter is a simple tracer that counts how many times each opcode is executed.

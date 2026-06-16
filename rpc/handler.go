@@ -28,8 +28,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/internal/telemetry"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/tenderly/net-taiko-geth/internal/telemetry"
+	"github.com/tenderly/net-taiko-geth/log"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 )

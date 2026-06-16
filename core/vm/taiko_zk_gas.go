@@ -4,7 +4,7 @@ import (
 	"errors"
 	"math"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/tenderly/net-taiko-geth/common"
 )
 
 // CHANGE(taiko): ErrZkGasLimitExceeded is returned when zk gas arithmetic overflows or exceeds the block limit.

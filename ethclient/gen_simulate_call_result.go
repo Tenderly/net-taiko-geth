@@ -5,8 +5,8 @@ package ethclient
 import (
 	"encoding/json"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/tenderly/net-taiko-geth/common/hexutil"
+	"github.com/tenderly/net-taiko-geth/core/types"
 )
 
 var _ = (*simulateCallResultMarshaling)(nil)

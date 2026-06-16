@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"slices"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/tenderly/net-taiko-geth/common"
 	ssz "github.com/ferranbt/fastssz"
 )
 

@@ -26,8 +26,8 @@ import (
 	"bytes"
 	"hash"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto/keccak"
+	"github.com/tenderly/net-taiko-geth/common"
+	"github.com/tenderly/net-taiko-geth/crypto/keccak"
 )
 
 // testHasher is the helper tool for transaction/receipt list hashing.

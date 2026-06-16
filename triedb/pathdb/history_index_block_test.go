@@ -315,7 +315,7 @@ func TestCorruptedIndexBlock(t *testing.T) {
 //
 // goos: darwin
 // goarch: arm64
-// pkg: github.com/ethereum/go-ethereum/triedb/pathdb
+// pkg: github.com/tenderly/net-taiko-geth/triedb/pathdb
 // cpu: Apple M1 Pro
 // BenchmarkParseIndexBlock
 // BenchmarkParseIndexBlock-8   	35829495	        34.16 ns/op
@@ -338,7 +338,7 @@ func BenchmarkParseIndexBlock(b *testing.B) {
 
 // goos: darwin
 // goarch: arm64
-// pkg: github.com/ethereum/go-ethereum/triedb/pathdb
+// pkg: github.com/tenderly/net-taiko-geth/triedb/pathdb
 // cpu: Apple M1 Pro
 // BenchmarkParseIndexBlockWithExt
 // BenchmarkParseIndexBlockWithExt-8   	35773242	        33.72 ns/op
@@ -364,7 +364,7 @@ func BenchmarkParseIndexBlockWithExt(b *testing.B) {
 //
 // goos: darwin
 // goarch: arm64
-// pkg: github.com/ethereum/go-ethereum/triedb/pathdb
+// pkg: github.com/tenderly/net-taiko-geth/triedb/pathdb
 // cpu: Apple M1 Pro
 // BenchmarkBlockWriterAppend
 // BenchmarkBlockWriterAppend-8   	293611083	         4.113 ns/op	       3 B/op	       0 allocs/op
@@ -390,7 +390,7 @@ func BenchmarkBlockWriterAppend(b *testing.B) {
 
 // goos: darwin
 // goarch: arm64
-// pkg: github.com/ethereum/go-ethereum/triedb/pathdb
+// pkg: github.com/tenderly/net-taiko-geth/triedb/pathdb
 // cpu: Apple M1 Pro
 // BenchmarkBlockWriterAppendWithExt
 // BenchmarkBlockWriterAppendWithExt-8   	11123844	       103.6 ns/op	      42 B/op	       2 allocs/op

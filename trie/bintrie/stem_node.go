@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/tenderly/net-taiko-geth/common"
 )
 
 // StemNode represents a group of `NodeWith` values sharing the same stem.

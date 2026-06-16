@@ -20,7 +20,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/tenderly/net-taiko-geth/common/hexutil"
 )
 
 // TestIterator tests some basic things about the ListIterator. A more

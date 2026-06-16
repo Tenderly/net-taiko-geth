@@ -20,7 +20,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/tenderly/net-taiko-geth/common"
 )
 
 func expectedLeaves(counts map[int]int64) [16]int64 {

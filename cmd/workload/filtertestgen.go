@@ -26,9 +26,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/internal/flags"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/tenderly/net-taiko-geth/common"
+	"github.com/tenderly/net-taiko-geth/internal/flags"
+	"github.com/tenderly/net-taiko-geth/rpc"
 	"github.com/urfave/cli/v2"
 )
 

@@ -24,7 +24,7 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/tenderly/net-taiko-geth/common"
 )
 
 // parallelDepth returns the tree depth below which Hash() spawns goroutines.

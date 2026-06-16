@@ -4,10 +4,10 @@ import (
 	"math"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	taikoGenesis "github.com/ethereum/go-ethereum/core/taiko_genesis"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/tenderly/net-taiko-geth/common"
+	taikoGenesis "github.com/tenderly/net-taiko-geth/core/taiko_genesis"
+	"github.com/tenderly/net-taiko-geth/log"
+	"github.com/tenderly/net-taiko-geth/params"
 )
 
 var (

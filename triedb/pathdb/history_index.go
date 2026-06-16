@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/tenderly/net-taiko-geth/core/rawdb"
+	"github.com/tenderly/net-taiko-geth/ethdb"
 )
 
 // parseIndex parses the index data from the provided byte stream. The index data

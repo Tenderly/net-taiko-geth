@@ -19,12 +19,12 @@ package transitiontrie
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/ethereum/go-ethereum/trie/bintrie"
-	"github.com/ethereum/go-ethereum/trie/trienode"
+	"github.com/tenderly/net-taiko-geth/common"
+	"github.com/tenderly/net-taiko-geth/core/types"
+	"github.com/tenderly/net-taiko-geth/ethdb"
+	"github.com/tenderly/net-taiko-geth/trie"
+	"github.com/tenderly/net-taiko-geth/trie/bintrie"
+	"github.com/tenderly/net-taiko-geth/trie/trienode"
 )
 
 // TransitionTrie is a trie that implements a façade design pattern, presenting

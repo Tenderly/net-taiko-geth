@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/tenderly/net-taiko-geth/params"
 )
 
 // CHANGE(taiko): Masaya is reset to activate Unzen from genesis. Unzen also

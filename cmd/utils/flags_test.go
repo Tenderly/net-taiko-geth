@@ -22,10 +22,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/tenderly/net-taiko-geth/core"
+	"github.com/tenderly/net-taiko-geth/eth/ethconfig"
+	"github.com/tenderly/net-taiko-geth/node"
+	"github.com/tenderly/net-taiko-geth/params"
 	"github.com/urfave/cli/v2"
 )
 

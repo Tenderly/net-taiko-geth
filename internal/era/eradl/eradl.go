@@ -25,8 +25,8 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/ethereum/go-ethereum/internal/download"
-	"github.com/ethereum/go-ethereum/internal/era"
+	"github.com/tenderly/net-taiko-geth/internal/download"
+	"github.com/tenderly/net-taiko-geth/internal/era"
 )
 
 //go:embed checksums_mainnet.txt

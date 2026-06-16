@@ -18,7 +18,7 @@ package era
 import (
 	"io"
 
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/tenderly/net-taiko-geth/rlp"
 )
 
 type ProofVariant uint16

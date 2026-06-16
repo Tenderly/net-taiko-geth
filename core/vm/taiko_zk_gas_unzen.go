@@ -3,7 +3,7 @@ package vm
 import (
 	"math"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/tenderly/net-taiko-geth/common"
 )
 
 // CHANGE(taiko): zk-gas block limit during Unzen.
