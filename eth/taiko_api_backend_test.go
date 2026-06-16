@@ -7,12 +7,13 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/consensus/ethash"
 	"github.com/ethereum/go-ethereum/consensus/taiko"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/params"
 )
@@ -47,7 +48,12 @@ func TestShastaProposalIDFromExtraDataInvalid(t *testing.T) {
 
 func TestTaikoAuthBackendExposesBatchLookupMethods(t *testing.T) {
 	backendType := reflect.TypeOf(&TaikoAuthAPIBackend{})
-	for _, name := range []string{"LastL1OriginByBatchID", "LastBlockIDByBatchID"} {
+	for _, name := range []string{
+		"LastL1OriginByBatchID",
+		"LastBlockIDByBatchID",
+		"LastCertainBlockIDByBatchID",
+		"LastCertainL1OriginByBatchID",
+	} {
 		if _, ok := backendType.MethodByName(name); !ok {
 			t.Fatalf("expected TaikoAuthAPIBackend to expose %s", name)
 		}
@@ -56,7 +62,12 @@ func TestTaikoAuthBackendExposesBatchLookupMethods(t *testing.T) {
 
 func TestTaikoAPIBackendHidesBatchLookupMethods(t *testing.T) {
 	backendType := reflect.TypeOf(&TaikoAPIBackend{})
-	for _, name := range []string{"LastL1OriginByBatchID", "LastBlockIDByBatchID"} {
+	for _, name := range []string{
+		"LastL1OriginByBatchID",
+		"LastBlockIDByBatchID",
+		"LastCertainBlockIDByBatchID",
+		"LastCertainL1OriginByBatchID",
+	} {
 		if _, ok := backendType.MethodByName(name); ok {
 			t.Fatalf("expected TaikoAPIBackend to hide %s", name)
 		}
@@ -91,8 +102,15 @@ func TestGetLastBlockByBatchIdUncertainAtHead(t *testing.T) {
 	}
 }
 
+func TestMaxBatchLookupBlocks(t *testing.T) {
+	if maxBatchLookupBlocks != 768*21_600 {
+		t.Fatalf("expected maxBatchLookupBlocks %d, got %d", 768*21_600, maxBatchLookupBlocks)
+	}
+}
+
 func TestGetLastBlockByBatchIdLookbackLimit(t *testing.T) {
-	chainLength := int(maxBatchLookupBlocks + 2)
+	const maxLookback = 3
+	chainLength := maxLookback + 2
 
 	proposalBytes := []byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06}
 	proposalID := new(big.Int).SetBytes(proposalBytes)
@@ -110,7 +128,7 @@ func TestGetLastBlockByBatchIdLookbackLimit(t *testing.T) {
 	engine := ethash.NewFaker()
 
 	db := rawdb.NewMemoryDatabase()
-	chain, err := core.NewBlockChain(db, nil, genesis, nil, engine, vm.Config{}, nil)
+	chain, err := core.NewBlockChain(db, genesis, engine, nil)
 	if err != nil {
 		t.Fatalf("failed to create chain: %v", err)
 	}
@@ -166,12 +184,107 @@ func TestGetLastBlockByBatchIdLookbackLimit(t *testing.T) {
 	rawdb.WriteHeadL1Origin(db, headBlock.Number())
 	chain.HeaderChain().SetCurrentHeader(headBlock.Header())
 
-	blockID, err := backend.getLastBlockByBatchId(proposalID)
+	blockID, err := backend.getLastBlockByBatchIdWithLimit(proposalID, maxLookback)
 	if !errors.Is(err, ErrProposalLastBlockLookbackExceeded) {
 		t.Fatalf("expected ErrProposalLastBlockLookbackExceeded, got %v", err)
 	}
 	if blockID != nil {
 		t.Fatalf("expected nil blockID, got %v", blockID)
+	}
+}
+
+func TestLastCertainL1OriginByBatchID(t *testing.T) {
+	db := rawdb.NewMemoryDatabase()
+	backend := &TaikoAuthAPIBackend{eth: &Ethereum{chainDb: db}}
+	batchID := (*hexutil.Big)(big.NewInt(1))
+
+	l1Origin, err := backend.LastCertainL1OriginByBatchID((*math.HexOrDecimal256)(batchID))
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if l1Origin != nil {
+		t.Fatalf("expected nil l1Origin, got %v", l1Origin)
+	}
+
+	blockID := big.NewInt(2)
+	expected := &rawdb.L1Origin{
+		BlockID:       blockID,
+		L2BlockHash:   common.HexToHash("0x1"),
+		L1BlockHeight: big.NewInt(3),
+		L1BlockHash:   common.HexToHash("0x2"),
+	}
+	rawdb.WriteBatchToLastBlockID(db, big.NewInt(1), blockID)
+	rawdb.WriteL1Origin(db, blockID, expected)
+
+	l1Origin, err = backend.LastCertainL1OriginByBatchID((*math.HexOrDecimal256)(batchID))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if l1Origin == nil {
+		t.Fatal("expected l1Origin, got nil")
+	}
+	if !reflect.DeepEqual(expected, l1Origin) {
+		t.Fatalf("expected %v, got %v", expected, l1Origin)
+	}
+}
+
+func TestBatchLookupMethodsReturnNilBelowNetworkThreshold(t *testing.T) {
+	const networkID = 999
+	batchID := big.NewInt(1)
+	blockID := big.NewInt(2)
+	threshold := uint64(3)
+
+	originalThreshold, hadThreshold := batchLookupBlockThresholds[networkID]
+	batchLookupBlockThresholds[networkID] = threshold
+	defer func() {
+		if hadThreshold {
+			batchLookupBlockThresholds[networkID] = originalThreshold
+		} else {
+			delete(batchLookupBlockThresholds, networkID)
+		}
+	}()
+
+	db := rawdb.NewMemoryDatabase()
+	backend := &TaikoAuthAPIBackend{eth: &Ethereum{chainDb: db, networkID: networkID}}
+	expectedOrigin := &rawdb.L1Origin{
+		BlockID:       blockID,
+		L2BlockHash:   common.HexToHash("0x1"),
+		L1BlockHeight: big.NewInt(3),
+		L1BlockHash:   common.HexToHash("0x2"),
+	}
+	rawdb.WriteBatchToLastBlockID(db, batchID, blockID)
+	rawdb.WriteL1Origin(db, blockID, expectedOrigin)
+
+	l1Origin, err := backend.LastL1OriginByBatchID((*math.HexOrDecimal256)(batchID))
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if l1Origin != nil {
+		t.Fatalf("expected nil l1Origin, got %v", l1Origin)
+	}
+
+	lastBlockID, err := backend.LastBlockIDByBatchID((*math.HexOrDecimal256)(batchID))
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if lastBlockID != nil {
+		t.Fatalf("expected nil blockID, got %v", lastBlockID)
+	}
+
+	certainBlockID, err := backend.LastCertainBlockIDByBatchID((*math.HexOrDecimal256)(batchID))
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if certainBlockID != nil {
+		t.Fatalf("expected nil certain blockID, got %v", certainBlockID)
+	}
+
+	certainL1Origin, err := backend.LastCertainL1OriginByBatchID((*math.HexOrDecimal256)(batchID))
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if certainL1Origin != nil {
+		t.Fatalf("expected nil certain l1Origin, got %v", certainL1Origin)
 	}
 }
 
@@ -210,7 +323,7 @@ func newShastaTestChain(t *testing.T) (ethdb.Database, *core.BlockChain, *big.In
 	})
 
 	db := rawdb.NewMemoryDatabase()
-	chain, err := core.NewBlockChain(db, nil, genesis, nil, engine, vm.Config{}, nil)
+	chain, err := core.NewBlockChain(db, genesis, engine, nil)
 	if err != nil {
 		t.Fatalf("failed to create chain: %v", err)
 	}

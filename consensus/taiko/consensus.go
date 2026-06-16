@@ -2,6 +2,7 @@ package taiko
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"math/big"
@@ -70,6 +71,21 @@ func New(chainConfig *params.ChainConfig, chainDB ethdb.Database) *Taiko {
 		),
 		chainDB: chainDB,
 	}
+}
+
+// CHANGE(taiko): SetChainConfig updates chain config used by this engine and refreshes derived fields.
+func (t *Taiko) SetChainConfig(chainConfig *params.ChainConfig) {
+	if chainConfig == nil {
+		return
+	}
+	taikoL2AddressPrefix := strings.TrimPrefix(chainConfig.ChainID.String(), "0")
+	t.chainConfig = chainConfig
+	t.taikoL2Address = common.HexToAddress(
+		"0x" +
+			taikoL2AddressPrefix +
+			strings.Repeat("0", common.AddressLength*2-len(taikoL2AddressPrefix)-len(TaikoL2AddressSuffix)) +
+			TaikoL2AddressSuffix,
+	)
 }
 
 // check all method stubs for interface `Engine` without affect performance.
@@ -157,9 +173,13 @@ func (t *Taiko) verifyHeader(chain consensus.ChainHeaderReader, header, parent *
 		return consensus.ErrInvalidNumber
 	}
 
-	// Difficulty should always be zero
-	if header.Difficulty != nil && header.Difficulty.Cmp(common.Big0) != 0 {
-		return fmt.Errorf("invalid difficulty: have %v, want %v", header.Difficulty, common.Big0)
+	// CHANGE(taiko): Unzen repurposes difficulty for zk gas; only enforce zero before Unzen.
+	if !t.chainConfig.IsUnzen(header.Time) {
+		if header.Difficulty != nil && header.Difficulty.Cmp(common.Big0) != 0 {
+			return fmt.Errorf("invalid difficulty: have %v, want %v", header.Difficulty, common.Big0)
+		}
+	} else if err := verifyUnzenHeaderFields(header); err != nil {
+		return err
 	}
 
 	// Verify that the gas limit is <= 2^63-1
@@ -193,7 +213,7 @@ func (t *Taiko) verifyHeader(chain consensus.ChainHeaderReader, header, parent *
 					return err
 				}
 			} else {
-				log.Warn(
+				log.Debug(
 					"Skipping EIP-4396 verification due to unknown ancestor",
 					"parent", parent.Hash(),
 					"number", parent.Number,
@@ -217,6 +237,33 @@ func (t *Taiko) verifyHeader(chain consensus.ChainHeaderReader, header, parent *
 		return consensus.ErrFutureBlock
 	}
 
+	return nil
+}
+
+// CHANGE(taiko): verifyUnzenHeaderFields enforces the canonical Unzen header fields
+// for imported blocks so the import path matches local sealing/finalization.
+func verifyUnzenHeaderFields(header *types.Header) error {
+	if header.RequestsHash == nil {
+		return fmt.Errorf("requests hash missing")
+	}
+	if *header.RequestsHash != types.EmptyRequestsHash {
+		return fmt.Errorf("invalid requests hash: have %v, want %v", *header.RequestsHash, types.EmptyRequestsHash)
+	}
+	if header.ParentBeaconRoot == nil {
+		return fmt.Errorf("parent beacon root missing")
+	}
+	if header.BlobGasUsed == nil {
+		return fmt.Errorf("blob gas used missing")
+	}
+	if *header.BlobGasUsed != 0 {
+		return fmt.Errorf("invalid blob gas used: have %d, want 0", *header.BlobGasUsed)
+	}
+	if header.ExcessBlobGas == nil {
+		return fmt.Errorf("excess blob gas missing")
+	}
+	if *header.ExcessBlobGas != 0 {
+		return fmt.Errorf("invalid excess blob gas: have %d, want 0", *header.ExcessBlobGas)
+	}
 	return nil
 }
 
@@ -251,7 +298,27 @@ func (t *Taiko) Prepare(chain consensus.ChainHeaderReader, header *types.Header)
 func (t *Taiko) Finalize(chain consensus.ChainHeaderReader, header *types.Header, state vm.StateDB, body *types.Body) {
 	// no block rewards in l2
 	header.UncleHash = types.CalcUncleHash(nil)
-	header.Difficulty = common.Big0
+
+	// CHANGE(taiko): Unzen sets difficulty to finalized zk gas (set by caller);
+	// pre-Unzen sets difficulty to zero.
+	if !t.chainConfig.IsUnzen(header.Time) {
+		header.Difficulty = common.Big0
+	}
+
+	// CHANGE(taiko): Unzen blocks require requestsHash, parentBeaconRoot, and blob gas fields.
+	if t.chainConfig.IsUnzen(header.Time) {
+		emptyRequests := types.EmptyRequestsHash
+		header.RequestsHash = &emptyRequests
+		if header.ParentBeaconRoot == nil {
+			zero := common.Hash{}
+			header.ParentBeaconRoot = &zero
+		}
+		zeroBlobGas := uint64(0)
+		header.BlobGasUsed = &zeroBlobGas
+		excessBlobGas := uint64(0)
+		header.ExcessBlobGas = &excessBlobGas
+	}
+
 	// Withdrawals processing.
 	for _, w := range body.Withdrawals {
 		state.AddBalance(
@@ -267,7 +334,7 @@ func (t *Taiko) Finalize(chain consensus.ChainHeaderReader, header *types.Header
 //
 // Note: The block header and state database might be updated to reflect any
 // consensus rules that happen at finalization (e.g. block rewards).
-func (t *Taiko) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, body *types.Body, receipts []*types.Receipt) (*types.Block, error) {
+func (t *Taiko) FinalizeAndAssemble(ctx context.Context, chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, body *types.Body, receipts []*types.Receipt) (*types.Block, error) {
 	if body.Withdrawals == nil {
 		body.Withdrawals = make([]*types.Withdrawal, 0)
 	}
@@ -280,6 +347,15 @@ func (t *Taiko) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *t
 		}
 		if !isAnchor {
 			return nil, ErrAnchorTxNotFound
+		}
+	}
+
+	// CHANGE(taiko): Unzen blocks must not contain blob transactions.
+	if t.chainConfig.IsUnzen(header.Time) {
+		for i, tx := range body.Transactions {
+			if tx.Type() == types.BlobTxType {
+				return nil, fmt.Errorf("blob transaction at index %d not allowed in Unzen block", i)
+			}
 		}
 	}
 

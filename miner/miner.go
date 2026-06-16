@@ -18,6 +18,7 @@
 package miner
 
 import (
+	"context"
 	"fmt"
 	"math/big"
 	"sync"
@@ -48,11 +49,12 @@ type Config struct {
 	GasCeil             uint64         // Target gas ceiling for mined blocks.
 	GasPrice            *big.Int       // Minimum gas price for mining a transaction
 	Recommit            time.Duration  // The time interval for miner to re-create mining work.
+	MaxBlobsPerBlock    int            // Maximum number of blobs per block (0 for unset uses protocol default)
 }
 
 // DefaultConfig contains default settings for miner.
 var DefaultConfig = Config{
-	GasCeil:  30_000_000,
+	GasCeil:  60_000_000,
 	GasPrice: big.NewInt(params.GWei / 1000),
 
 	// The default recommit time is chosen as two seconds since
@@ -74,25 +76,17 @@ type Miner struct {
 	chain       *core.BlockChain
 	pending     *pending
 	pendingMu   sync.Mutex // Lock protects the pending block
-
-	// CHANGE(taiko): simulationApiWorker manages worker state and provides API overrides for simulation support.
-	simulationApiWorker *SimulationAPIWorker
 }
 
-// CHANGE(taiko): New creates a new miner with provided config and simulation support.
-func New(eth Backend, config Config, chainConfig *params.ChainConfig, engine consensus.Engine, preconfState *PreconfState) *Miner {
-	simulationApiWorker, err := NewSimulationApiWorker(chainConfig, eth.BlockChain(), &config, engine, preconfState)
-	if err != nil {
-		panic(err)
-	}
+// New creates a new miner with provided config.
+func New(eth Backend, config Config, engine consensus.Engine) *Miner {
 	return &Miner{
-		config:              &config,
-		chainConfig:         eth.BlockChain().Config(),
-		engine:              engine,
-		txpool:              eth.TxPool(),
-		chain:               eth.BlockChain(),
-		pending:             &pending{},
-		simulationApiWorker: simulationApiWorker,
+		config:      &config,
+		chainConfig: eth.BlockChain().Config(),
+		engine:      engine,
+		txpool:      eth.TxPool(),
+		chain:       eth.BlockChain(),
+		pending:     &pending{},
 	}
 }
 
@@ -142,8 +136,8 @@ func (miner *Miner) SetGasTip(tip *big.Int) error {
 }
 
 // BuildPayload builds the payload according to the provided parameters.
-func (miner *Miner) BuildPayload(args *BuildPayloadArgs, witness bool) (*Payload, error) {
-	return miner.buildPayload(args, witness)
+func (miner *Miner) BuildPayload(ctx context.Context, args *BuildPayloadArgs, witness bool) (*Payload, error) {
+	return miner.buildPayload(ctx, args, witness)
 }
 
 // getPending retrieves the pending block based on the current head block.
@@ -152,10 +146,10 @@ func (miner *Miner) getPending() *newPayloadResult {
 	header := miner.chain.CurrentHeader()
 	miner.pendingMu.Lock()
 	defer miner.pendingMu.Unlock()
+
 	if cached := miner.pending.resolve(header.Hash()); cached != nil {
 		return cached
 	}
-
 	var (
 		timestamp  = uint64(time.Now().Unix())
 		withdrawal types.Withdrawals
@@ -163,16 +157,17 @@ func (miner *Miner) getPending() *newPayloadResult {
 	if miner.chainConfig.IsShanghai(new(big.Int).Add(header.Number, big.NewInt(1)), timestamp) {
 		withdrawal = []*types.Withdrawal{}
 	}
-	ret := miner.generateWork(&generateParams{
-		timestamp:   timestamp,
-		forceTime:   false,
-		parentHash:  header.Hash(),
-		coinbase:    miner.config.PendingFeeRecipient,
-		random:      common.Hash{},
-		withdrawals: withdrawal,
-		beaconRoot:  nil,
-		noTxs:       false,
-	}, false) // we will never make a witness for a pending block
+	ret := miner.generateWork(context.Background(),
+		&generateParams{
+			timestamp:   timestamp,
+			forceTime:   false,
+			parentHash:  header.Hash(),
+			coinbase:    miner.config.PendingFeeRecipient,
+			random:      common.Hash{},
+			withdrawals: withdrawal,
+			beaconRoot:  nil,
+			noTxs:       false,
+		}, false) // we will never make a witness for a pending block
 	if ret.err != nil {
 		return nil
 	}

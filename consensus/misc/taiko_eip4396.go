@@ -16,8 +16,9 @@ const maxGasTargetTargetPercentage uint64 = 95
 
 // Min and Max base fee for Shasta blocks.
 var (
-	minBaseFeeShasta = new(big.Int).SetUint64(5_000_000)     // 0.005 Gwei
-	maxBaseFeeShasta = new(big.Int).SetUint64(1_000_000_000) // 1 Gwei
+	minBaseFeeShastaDefault = new(big.Int).SetUint64(5_000_000)     // 0.005 Gwei
+	minBaseFeeShastaMainnet = new(big.Int).SetUint64(10_000_000)    // 0.01 Gwei
+	maxBaseFeeShasta        = new(big.Int).SetUint64(1_000_000_000) // 1 Gwei
 )
 
 // VerifyEIP4396Header verifies some header attributes which were changed in EIP-4396,
@@ -46,7 +47,6 @@ func CalcEIP4396BaseFee(config *params.ChainConfig, parent *types.Header, parent
 	if parent.Number.Cmp(common.Big0) == 0 {
 		return new(big.Int).SetUint64(params.ShastaInitialBaseFee)
 	}
-
 	parentGasTarget := parent.GasLimit / config.ElasticityMultiplier()
 	parentAdjustedGasTarget := min(
 		parentGasTarget*parentBlockTime/blockTimeTarget,
@@ -62,7 +62,6 @@ func CalcEIP4396BaseFee(config *params.ChainConfig, parent *types.Header, parent
 		num   = new(big.Int)
 		denom = new(big.Int)
 	)
-
 	if parent.GasUsed > parentAdjustedGasTarget {
 		// If the parent block used more gas than its target, the baseFee should increase.
 		// max(1, parentBaseFee * gasUsedDelta / parentGasTarget / baseFeeChangeDenominator)
@@ -71,9 +70,9 @@ func CalcEIP4396BaseFee(config *params.ChainConfig, parent *types.Header, parent
 		num.Div(num, denom.SetUint64(parentGasTarget))
 		num.Div(num, denom.SetUint64(config.BaseFeeChangeDenominator()))
 		if num.Cmp(common.Big1) < 0 {
-			return clampEIP4396BaseFeeShasta(num.Add(parent.BaseFee, common.Big1))
+			return clampEIP4396BaseFeeShasta(config, num.Add(parent.BaseFee, common.Big1))
 		}
-		return clampEIP4396BaseFeeShasta(num.Add(parent.BaseFee, num))
+		return clampEIP4396BaseFeeShasta(config, num.Add(parent.BaseFee, num))
 	} else {
 		// Otherwise if the parent block used less gas than its target, the baseFee should decrease.
 		// max(0, parentBaseFee * gasUsedDelta / parentGasTarget / baseFeeChangeDenominator)
@@ -86,20 +85,31 @@ func CalcEIP4396BaseFee(config *params.ChainConfig, parent *types.Header, parent
 		if baseFee.Cmp(common.Big0) < 0 {
 			baseFee = common.Big0
 		}
-		return clampEIP4396BaseFeeShasta(baseFee)
+		return clampEIP4396BaseFeeShasta(config, baseFee)
 	}
 }
 
 // clampEIP4396BaseFeeShasta clamps the base fee to be within the min and max limits for Shasta blocks.
-func clampEIP4396BaseFeeShasta(baseFee *big.Int) *big.Int {
+func clampEIP4396BaseFeeShasta(config *params.ChainConfig, baseFee *big.Int) *big.Int {
 	if baseFee == nil {
 		return nil
 	}
-	if baseFee.Cmp(minBaseFeeShasta) < 0 {
-		return minBaseFeeShasta
+	minBaseFee := minBaseFeeShastaDefault
+	if isTaikoMainnet(config) {
+		minBaseFee = minBaseFeeShastaMainnet
+	}
+	if baseFee.Cmp(minBaseFee) < 0 {
+		return minBaseFee
 	}
 	if baseFee.Cmp(maxBaseFeeShasta) > 0 {
 		return maxBaseFeeShasta
 	}
 	return baseFee
+}
+
+// isTaikoMainnet checks if the chain config corresponds to Taiko Mainnet.
+func isTaikoMainnet(config *params.ChainConfig) bool {
+	return config != nil &&
+		config.ChainID != nil &&
+		config.ChainID.Cmp(params.TaikoMainnetNetworkID) == 0
 }

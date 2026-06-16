@@ -17,6 +17,7 @@
 package miner
 
 import (
+	"context"
 	"math/big"
 	"reflect"
 	"testing"
@@ -32,7 +33,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/txpool"
 	"github.com/ethereum/go-ethereum/core/txpool/legacypool"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/params"
@@ -118,7 +118,7 @@ func newTestWorkerBackend(t *testing.T, chainConfig *params.ChainConfig, engine 
 	default:
 		t.Fatalf("unexpected consensus engine type: %T", engine)
 	}
-	chain, err := core.NewBlockChain(db, &core.CacheConfig{TrieDirtyDisabled: true}, gspec, nil, engine, vm.Config{}, nil)
+	chain, err := core.NewBlockChain(db, gspec, engine, &core.BlockChainConfig{ArchiveMode: true})
 	if err != nil {
 		t.Fatalf("core.NewBlockChain failed: %v", err)
 	}
@@ -139,7 +139,7 @@ func (b *testWorkerBackend) TxPool() *txpool.TxPool       { return b.txPool }
 func newTestWorker(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine, db ethdb.Database, blocks int) (*Miner, *testWorkerBackend) {
 	backend := newTestWorkerBackend(t, chainConfig, engine, db, blocks)
 	backend.txPool.Add(pendingTxs, true)
-	w := New(backend, testConfig, chainConfig, engine, nil)
+	w := New(backend, testConfig, engine)
 	return w, backend
 }
 
@@ -157,7 +157,7 @@ func TestBuildPayload(t *testing.T) {
 		Random:       common.Hash{},
 		FeeRecipient: recipient,
 	}
-	payload, err := w.buildPayload(args, false)
+	payload, err := w.buildPayload(context.Background(), args, false)
 	if err != nil {
 		t.Fatalf("Failed to build payload %v", err)
 	}

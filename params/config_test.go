@@ -17,6 +17,7 @@
 package params
 
 import (
+	"encoding/json"
 	"math"
 	"math/big"
 	"reflect"
@@ -154,4 +155,42 @@ func TestTimestampCompatError(t *testing.T) {
 
 	require.Equal(t, newTimestampCompatError(errWhat, newUint64(0), newUint64(1681338455)).Error(),
 		"mismatching Shanghai fork timestamp in database (have timestamp 0, want timestamp 1681338455, rewindto timestamp 0)")
+}
+
+func TestTaikoUnzenConfigJSONAndActivation(t *testing.T) {
+	var cfg ChainConfig
+	err := json.Unmarshal([]byte(`{"chainId":167000,"taiko":true,"unzenTime":42}`), &cfg)
+	require.NoError(t, err)
+	require.NotNil(t, cfg.UnzenTime)
+	require.Equal(t, uint64(42), *cfg.UnzenTime)
+	require.False(t, cfg.IsUnzen(41))
+	require.True(t, cfg.IsUnzen(42))
+	require.True(t, cfg.IsUnzen(43))
+
+	out, err := json.Marshal(&cfg)
+	require.NoError(t, err)
+	require.Contains(t, string(out), `"unzenTime":42`)
+	oldTypoKey := "u" + "zenTime"
+	require.NotContains(t, string(out), oldTypoKey)
+}
+
+func TestTaikoNetworkIDsArePinned(t *testing.T) {
+	// Network IDs are part of consensus and must not silently drift if
+	// params/taiko_config.go is edited. Genesis-hash tests do not depend on
+	// chain id, so pin them here explicitly.
+	cases := []struct {
+		name string
+		got  *big.Int
+		want int64
+	}{
+		{"taiko-mainnet", TaikoMainnetNetworkID, 167000},
+		{"taiko-internal", TaikoInternalNetworkID, 167001},
+		{"masaya-devnet", MasayaDevnetNetworkID, 167011},
+		{"taiko-hoodi", TaikoHoodiNetworkID, 167013},
+	}
+	for _, c := range cases {
+		if c.got == nil || c.got.Int64() != c.want {
+			t.Fatalf("%s network id = %v, want %d", c.name, c.got, c.want)
+		}
+	}
 }
